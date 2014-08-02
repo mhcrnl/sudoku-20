@@ -46,16 +46,24 @@ class sudoku
 {
 	private:
 		int grid[9][9];
+		int temp[9];
+		void clear_temp();
 		bool check_row(int);
 		bool check_col(int);
+		//bool check_subgrid(int,int);
+		//bool check_win();
 		bool int_in_row(int,int);
 		bool int_in_col(int,int);
+		bool int_in_subgrid(int,int,int);
+		void row_solve(int);
+		void col_solve(int);
 	public:
 		sudoku();
 		void draw();
 		void set_cell(int, int, int);
 		void fill_rand(int);
-		//void check();
+		void clear_grid();
+		void solve();
 };
 
 // Constructor for sudoku
@@ -71,6 +79,7 @@ sudoku::sudoku()
 void sudoku::draw()
 {
 	int i,j;
+	cout << "\n";
 	fancy_line();
 	for(i = 0; i < 9; i++)
 	{
@@ -196,6 +205,26 @@ bool sudoku::int_in_col(int n, int col)
 	return false;
 }//sudoku::int_in_row
 
+// Returns true if the given integer is present in the subgrid
+bool sudoku::int_in_subgrid(int x, int y, int n)
+{
+	int i, j;
+	int xcor, ycor;
+	xcor = x - x%3;
+	ycor = y - y%3;
+	for(i = 0; i < 3; i++)
+	{
+		for(j = 0; j < 3; j++)
+		{
+			if(grid[ycor + i][xcor + j] == n)
+			{
+				return true;
+			}//if
+		}//for
+	}//for
+	return false;
+}//sudoku::int_in_subgrid
+
 // Fills the grid with random integers from 1-9
 void sudoku::fill_rand(int m)
 {
@@ -208,7 +237,7 @@ void sudoku::fill_rand(int m)
 		if(grid[y][x] == 0)
 		{
 			n = rand()%9 + 1;
-			if(!int_in_col(n, x) && !int_in_row(n, y))
+			if(!int_in_col(n, x) && !int_in_row(n, y) && !int_in_subgrid(x, y, n))
 			{
 				grid[y][x] = n;
 				k++;
@@ -217,17 +246,122 @@ void sudoku::fill_rand(int m)
 	}//while
 }//fill_rand
 
+// Clears the sudoku grid
+void sudoku::clear_grid()
+{
+	int i, j;
+	for(i = 0; i < 9; i++)
+		for(j = 0; j < 9; j++)
+			grid[i][j] = 0;
+}//sudoku::clear_grid
+
+// Clears the temp array
+void sudoku::clear_temp()
+{
+	int i;
+	for(i = 0; i < 9; i++)
+		temp[i] = 0;
+}//sudoku::clear_temp
+
+// Solves the rows of the sudoku
+void sudoku::row_solve(int n)
+{
+	int i, j;
+	int sum = 0;
+	clear_temp();
+	for(i = 0; i < 9; i++)
+	{
+		if(!int_in_row(n, i))
+		{
+			for(j = 0; j < 9; j++)
+			{
+				if(grid[i][j] == 0)
+				{
+					if(!int_in_col(n, j) && !int_in_subgrid(j, i, n))
+					{
+						temp[j] = 1;
+						sum++;
+					}
+				}//if
+			}//for
+			if(sum == 1)
+			{
+				for(j = 0; j < 9; j++)
+				{
+					if(temp[j] == 1)
+					{
+						grid[i][j] = n;
+						break;
+					}
+				}//for
+			}//if
+		}//if
+		clear_temp();
+		sum = 0;
+	}//for
+}//sudoku::row_solve()
+
+// Solves the colums of the sudoku
+void sudoku::col_solve(int n)
+{
+	int i, j;
+	int sum = 0;
+	clear_temp();
+	for(j = 0; j < 9; j++)
+	{
+		if(!int_in_col(n, j))
+		{
+			for(i = 0; i < 9; i++)
+			{
+				if(grid[i][j] == 0)
+				{
+					if(!int_in_row(n, i) && !int_in_subgrid(j, i, n))
+					{
+						temp[i] = 1;
+						sum++;
+					}
+				}//if
+			}//for
+			if(sum == 1)
+			{
+				for(i = 0; i < 9; i++)
+				{
+					if(temp[i] == 1)
+					{
+						grid[i][j] = n;
+						break;
+					}
+				}//for
+			}//if
+		}//if
+		clear_temp();
+		sum = 0;
+	}//for
+}//sudoku::col_solve()
+
+// Tries to solve the given sudoku
+void sudoku::solve()
+{
+	int n;
+
+	for(n = 1; n <= 9; n++)
+	{
+		row_solve(n);
+		col_solve(n);
+	}//for
+}//sudoku::solve
+
 // Menu where the user can preform actions
 void menu(sudoku &sud)
 {
 	int n;
-	int x,y;
+	int x, y;
 	char car = ' ';
 	cout << "Welcome to this humble commandline implementation of sudoku" << endl;
 
 	while(car != 'E')
 	{
-		cout << "\n[S]et cell, [D]raw, [R]andom fill, [E]xit\n";
+		cout << "\n[S]et cell, [D]raw, [R]andom fill, S[O]lve, [C]lear grid, [E]xit\n";
 		car = read_char();
 		switch(car)
 		{
@@ -249,6 +383,14 @@ void menu(sudoku &sud)
 				cout << "Filling the grid randomly. n= ";
 				cin >> n;
 				sud.fill_rand(n);
+				break;
+			case 'O':
+				cout << "Solving sudoku\n";
+				sud.solve();
+				break;
+			case 'C':
+				cout << "Clearing grid\n";
+				sud.clear_grid();
 				break;
 		}//switch
 		sud.draw();
