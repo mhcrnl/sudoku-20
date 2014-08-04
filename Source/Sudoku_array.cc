@@ -1,6 +1,7 @@
 // This is a simple commandline sudoku program.
 
 #include<iostream>
+#include<fstream>
 #include<cstdlib>
 
 using namespace std;
@@ -64,6 +65,8 @@ class sudoku
 		void fill_rand(int);
 		void clear_grid();
 		void solve();
+		void in(string);
+		void out(string);
 };
 
 // Constructor for sudoku
@@ -339,6 +342,50 @@ void sudoku::col_solve(int n)
 	}//for
 }//sudoku::col_solve()
 
+//Imports the given file in the sudoku-grid
+void sudoku::in(string infile)
+{
+	int i, j;
+	ifstream invoer;
+
+	invoer.open(infile.c_str(), ios::in); //Invoerfile
+	if(invoer.fail())
+	{
+		cout << "File niet geopend\n";
+		return;
+	}//if
+
+	clear_grid();
+
+	for(i = 0; i < 9; i++)
+	{
+		for(j = 0; j < 9; j++)
+		{
+			invoer >> grid[i][j];
+		}//for
+	}//for
+	invoer.close();
+}//sudoku::in
+
+// Exports the current sudoku grid
+void sudoku::out(string outfile)
+{
+	int i, j;
+	ofstream outstream;
+	outstream.open(outfile.c_str(), ios::out);
+
+	for(i = 0; i < 9; i++)
+	{
+		for(j = 0; j < 9; j++)
+		{
+			outstream << grid[i][j];
+			outstream << ' ';
+		}//for
+		outstream << '\n';
+	}//for
+	outstream.close();
+}//sudoku::out
+
 // Tries to solve the given sudoku
 void sudoku::solve()
 {
@@ -357,11 +404,14 @@ void menu(sudoku &sud)
 	int n;
 	int x, y;
 	char car = ' ';
+	string infile;
+	string outfile;
 	cout << "Welcome to this humble commandline implementation of sudoku" << endl;
 
-	while(car != 'E')
+	while(car != 'X')
 	{
-		cout << "\n[S]et cell, [D]raw, [R]andom fill, S[O]lve, [C]lear grid, [E]xit\n";
+		cout << "\n[S]et cell, [D]raw, [R]andom fill, S[O]lve, [C]lear grid, [I]mport,\n"
+			  << "[E]xport, E[X]it\n";
 		car = read_char();
 		switch(car)
 		{
@@ -391,6 +441,18 @@ void menu(sudoku &sud)
 			case 'C':
 				cout << "Clearing grid\n";
 				sud.clear_grid();
+				break;
+			case 'I':
+				cout << "Importing file\n";
+				cout << "File to be imported?\n";
+				cin >> infile;
+				sud.in(infile);
+				break;
+			case 'E':
+				cout << "Exporting file\n";
+				cout << "Name of file: ";
+				cin >> outfile;
+				sud.out(outfile);
 				break;
 		}//switch
 		sud.draw();
