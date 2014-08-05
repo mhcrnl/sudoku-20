@@ -56,8 +56,8 @@ class sudoku
 		bool int_in_row(int,int);
 		bool int_in_col(int,int);
 		bool int_in_subgrid(int,int,int);
-		void row_solve(int);
-		void col_solve(int);
+		void row_solve(int,int&);
+		void col_solve(int,int&);
 	public:
 		sudoku();
 		void draw();
@@ -233,8 +233,11 @@ void sudoku::fill_rand(int m)
 {
 	int k = 0;
 	int x, y, n;
-	while(k < m)
+	int steps = 0;
+
+	while(k < m && steps < 1000)
 	{
+		steps++;
 		x = rand()%9;
 		y = rand()%9;
 		if(grid[y][x] == 0)
@@ -244,6 +247,7 @@ void sudoku::fill_rand(int m)
 			{
 				grid[y][x] = n;
 				k++;
+				steps = 0;
 			}//if
 		}//if
 	}//while
@@ -267,7 +271,7 @@ void sudoku::clear_temp()
 }//sudoku::clear_temp
 
 // Solves the rows of the sudoku
-void sudoku::row_solve(int n)
+void sudoku::row_solve(int n, int & add_row)
 {
 	int i, j;
 	int sum = 0;
@@ -294,6 +298,7 @@ void sudoku::row_solve(int n)
 					if(temp[j] == 1)
 					{
 						grid[i][j] = n;
+						add_row++;
 						break;
 					}
 				}//for
@@ -305,7 +310,7 @@ void sudoku::row_solve(int n)
 }//sudoku::row_solve()
 
 // Solves the colums of the sudoku
-void sudoku::col_solve(int n)
+void sudoku::col_solve(int n, int & add_col)
 {
 	int i, j;
 	int sum = 0;
@@ -332,6 +337,7 @@ void sudoku::col_solve(int n)
 					if(temp[i] == 1)
 					{
 						grid[i][j] = n;
+						add_col++;
 						break;
 					}
 				}//for
@@ -390,12 +396,17 @@ void sudoku::out(string outfile)
 void sudoku::solve()
 {
 	int n;
-
-	for(n = 1; n <= 9; n++)
+	int add_row, add_col;
+	do
 	{
-		row_solve(n);
-		col_solve(n);
-	}//for
+		add_row = 0;
+		add_col = 0;
+		for(n = 1; n <= 9; n++)
+		{
+			row_solve(n, add_row);
+			col_solve(n, add_col);
+		}//for
+	}while(add_row != 0 || add_col != 0);
 }//sudoku::solve
 
 // Menu where the user can preform actions
