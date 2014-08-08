@@ -58,6 +58,7 @@ class sudoku
 		bool int_in_subgrid(int,int,int);
 		void row_solve(int,int&);
 		void col_solve(int,int&);
+		void subgrid_solve(int,int&);
 	public:
 		sudoku();
 		void draw();
@@ -288,7 +289,7 @@ void sudoku::row_solve(int n, int & add_row)
 					{
 						temp[j] = 1;
 						sum++;
-					}
+					}//if
 				}//if
 			}//for
 			if(sum == 1)
@@ -300,7 +301,7 @@ void sudoku::row_solve(int n, int & add_row)
 						grid[i][j] = n;
 						add_row++;
 						break;
-					}
+					}//if
 				}//for
 			}//if
 		}//if
@@ -327,7 +328,7 @@ void sudoku::col_solve(int n, int & add_col)
 					{
 						temp[i] = 1;
 						sum++;
-					}
+					}//if
 				}//if
 			}//for
 			if(sum == 1)
@@ -339,7 +340,7 @@ void sudoku::col_solve(int n, int & add_col)
 						grid[i][j] = n;
 						add_col++;
 						break;
-					}
+					}//if
 				}//for
 			}//if
 		}//if
@@ -347,6 +348,59 @@ void sudoku::col_solve(int n, int & add_col)
 		sum = 0;
 	}//for
 }//sudoku::col_solve()
+
+// Solves for the subgrids
+void sudoku::subgrid_solve(int n, int & add_subgrid)
+{
+	int i, j ,k , m;
+	int sum = 0;
+	int temp_sub[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+	for(k = 0; k < 9; k = k + 3)
+	{
+		for(m = 0; m < 9; m = m + 3)
+		{
+			if(!int_in_subgrid(m, k, n))
+			{
+				for(i = 0; i < 3; i++)
+				{
+					for(j = 0; j < 3; j++)
+					{
+						if(grid[k+i][m+j] == 0)
+						{
+							if(!int_in_col(n, m + j) && !int_in_row(n, k + i))
+							{
+								temp_sub[i][j] = 1;
+								sum++;
+							}//if
+						}//if
+					}//for
+				}//for
+				if(sum == 1)
+				{
+					for(i = 0; i < 3; i++)
+					{
+						for(j = 0; j < 3; j++)
+						{
+							if(temp_sub[i][j] == 1)
+							{
+								grid[k+i][m+j] = n;
+								add_subgrid++;
+							}//if
+						}//for
+					}//for
+				}//if
+				for(i = 0; i < 3; i++)
+				{
+					for(j = 0; j < 3; j++)
+					{
+						temp_sub[i][j] = 0;
+					}//for
+				}//for
+				sum = 0;
+			}//if
+		}//for
+	}//for
+}//sudoku::subgrid_solve
 
 //Imports the given file in the sudoku-grid
 void sudoku::in(string infile)
@@ -396,17 +450,19 @@ void sudoku::out(string outfile)
 void sudoku::solve()
 {
 	int n;
-	int add_row, add_col;
+	int add_row, add_col, add_subgrid;
 	do
 	{
 		add_row = 0;
 		add_col = 0;
+		add_subgrid = 0;
 		for(n = 1; n <= 9; n++)
 		{
 			row_solve(n, add_row);
 			col_solve(n, add_col);
+			subgrid_solve(n, add_subgrid);
 		}//for
-	}while(add_row != 0 || add_col != 0);
+	}while(add_row != 0 || add_col != 0 || add_subgrid != 0);
 }//sudoku::solve
 
 // Menu where the user can preform actions
@@ -424,6 +480,7 @@ void menu(sudoku &sud)
 		cout << "\n[S]et cell, [D]raw, [R]andom fill, S[O]lve, [C]lear grid, [I]mport,\n"
 			  << "[E]xport, E[X]it\n";
 		car = read_char();
+		car = toupper(car);
 		switch(car)
 		{
 			case 'S':
