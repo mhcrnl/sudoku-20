@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1516710475 source:/home/mhcrnl/2018Q1/C++/sudoku-20/MhcrnlSudoku/main.cpp
+	<iostream>
+	"sudoku.h"
+	"controller.h"
+
+1516714509 /home/mhcrnl/2018Q1/C++/sudoku-20/MhcrnlSudoku/include/sudoku.h
+	<iostream>
+
+1516711349 /home/mhcrnl/2018Q1/C++/sudoku-20/MhcrnlSudoku/controller.h
+	"sudoku.h"
+
+1516714581 source:/home/mhcrnl/2018Q1/C++/sudoku-20/MhcrnlSudoku/controller.cpp
+	"controller.h"
+
+1516714519 source:/home/mhcrnl/2018Q1/C++/sudoku-20/MhcrnlSudoku/src/sudoku.cpp
+	"sudoku.h"
+
